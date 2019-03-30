@@ -32,11 +32,11 @@ router.post('/', auth.optional, (req, res, next) => {
 })
 
 // POST login route (optional, open route)
-router.post('/login', auth.optional, (req, res, next) => {
+router.post('/login', auth.optional, async (req, res, next) => {
   const { body: { user } } = req
 
   if (!user.email) {
-    return res.status(422).json({
+    return res.status(401).json({
       errors: {
         email: 'is required'
       }
@@ -44,7 +44,7 @@ router.post('/login', auth.optional, (req, res, next) => {
   }
 
   if (!user.password) {
-    return res.status(422).json({
+    return res.status(401).json({
       errors: {
         password: 'is required'
       }
@@ -62,7 +62,7 @@ router.post('/login', auth.optional, (req, res, next) => {
       return res.json({ user: user.toAuthJSON() })
     }
     // Maybe without res
-    return res.send({ info })
+    return res.status(401).send({ info })
   })(req, res, next)
 })
 
