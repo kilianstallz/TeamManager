@@ -28,7 +28,8 @@ if (!isProduction) {
 }
 
 // Configure Mongoose
-mongoose.connect('mongodb://localhost:27017/teammanager', {
+// mongoose.connect('mongodb://localhost:27017/teammanager', {
+mongoose.connect('mongodb+srv://tm-dev-admin:tm-dev-admin@teammanager-csuqv.mongodb.net/test?retryWrites=true', {
   useNewUrlParser: true,
   useFindAndModify: false,
   useCreateIndex: true

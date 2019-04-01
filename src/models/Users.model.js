@@ -12,8 +12,8 @@ const UsersSchema = new Schema({
     dropDups: true,
     required: true
   },
-  name: String,
-  Birthday: Date,
+  firstName: String,
+  lastName: String,
   hash: {
     type: String,
     select: false,
@@ -23,6 +23,8 @@ const UsersSchema = new Schema({
     type: String,
     select: false
   },
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
   // Team Data
   team: {
     type: Schema.Types.ObjectId,
