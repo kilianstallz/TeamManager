@@ -30,7 +30,8 @@ if (!isProduction) {
 // Configure Mongoose
 mongoose.connect('mongodb://localhost:27017/teammanager', {
   useNewUrlParser: true,
-  useFindAndModify: false
+  useFindAndModify: false,
+  useCreateIndex: true
 })
 mongoose.set('debug', true)
 

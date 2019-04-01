@@ -11,7 +11,7 @@ passport.use(new LocalStrategy({
   User.findOne({ email }).select('+salt +hash').exec()
     .then(user => {
       if (!user || !user.validatePassword(password)) {
-        return done(null, false, { errors: { 'email or password': 'is invalid' } })
+        return done(null, false, { errors: { message: 'Email or Password is invalid' } })
       }
       return done(null, user)
     })

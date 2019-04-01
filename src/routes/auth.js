@@ -1,10 +1,16 @@
 const jwt = require('express-jwt')
 
 const getTokenFromHeaders = (req) => {
-  const { headers: { authorization } } = req
+  let token = req.headers['x-access-token'] || req.headers['authorization']
 
-  if (authorization && authorization.split(' ')[0] === 'Bearer') {
-    return authorization.split(' ')[1]
+  if (token) {
+    if (token.startsWith('Bearer ')) {
+      // remove Bearer from string
+      token = token.slice(7, token.length)
+      return token
+    } else {
+      return token
+    }
   }
   return null
 }
