@@ -7,6 +7,8 @@ const nodemailer = require('nodemailer')
 const router = require('express').Router()
 const User = mongoose.model('User')
 
+const { forgotPasswordMailer } = require('../../config/nodemailer')
+
 // POST new user route (optional, open route)
 router.post('/signup', auth.optional, (req, res, next) => {
   const { body: { user } } = req
@@ -69,7 +71,7 @@ router.post('/login', auth.optional, async (req, res, next) => {
 })
 
 router.post('/forgot', auth.optional, (req, res, next) => {
-  console.log('forgot')
+  console.log('forgot', req.body)
   async.waterfall([
     done => {
       crypto.randomBytes(20, (err, buf) => {
@@ -80,10 +82,10 @@ router.post('/forgot', auth.optional, (req, res, next) => {
     (token, done) => {
       User.findOne({ email: req.body.email }, (err, user) => {
         if (!user) {
-          return res.send(404).send({ errors: { message: 'No user found with this email!' } })
+          return res.status(404).send({ errors: { message: 'No user found with this email!' } })
         }
         if (err) {
-          return res.send(500).send({ errors: { error: err } })
+          return res.status(500).send({ errors: { error: err } })
         }
         user.resetPasswordToken = token
         user.resetPasswordExpires = Date.now() + 36000000
@@ -94,29 +96,7 @@ router.post('/forgot', auth.optional, (req, res, next) => {
       })
     },
     (token, user, done) => {
-      var smtpTransport = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false,
-        requireTLS: true,
-        auth: {
-          user: 'kp.stallinger@gmail.com',
-          pass: 'Nailik#pi15'
-        }
-      })
-      const mailOptions = {
-        to: user.email,
-        from: 'kp.stallinger@gmail.com',
-        subject: 'TeamManager Password Reset',
-        text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
-          'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-          'http://localhost:8080/login?method=reset/' + token + '\n\n' +
-          'If you did not request this, please ignore this email and your password will remain unchanged.\n'
-      }
-      smtpTransport.sendMail(mailOptions, err => {
-        done(err, true)
-        res.sendStatus(200)
-      })
+      forgotPasswordMailer(token, user, done, res)
     }
   ], err => {
     if (err) return next(err)
@@ -148,8 +128,8 @@ router.post('/reset/:token', auth.optional, (req, res, next) => {
         secure: false,
         requireTLS: true,
         auth: {
-          user: 'kp.stallinger@gmail.com',
-          pass: 'Nailik#pi15'
+          user: process.env.MAILER_EMAIL,
+          pass: process.env.MAILER_PASSWORD
         }
       })
       const mailOptions = {
@@ -157,7 +137,7 @@ router.post('/reset/:token', auth.optional, (req, res, next) => {
         from: 'kp.stallinger@gmail.com',
         subject: 'Your password has been changed!',
         text: 'Hello,\n\n' +
-        'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
+          'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
       }
       smtpTransport.sendMail(mailOptions, err => {
         done(err, 'done')
