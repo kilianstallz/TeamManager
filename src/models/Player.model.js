@@ -13,7 +13,11 @@ const PlayersSchema = new Schema({
     required: true,
     trim: true
   },
-  createdAt: Date
+  phone: String,
+  address: String,
+  position: Object,
+  createdAt: Date,
+  updatedAt: Date
 })
 
 PlayersSchema.pre('save', function (next) {
