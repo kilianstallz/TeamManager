@@ -3,11 +3,10 @@ const passport = require('passport')
 const crypto = require('crypto')
 const auth = require('../auth')
 const async = require('async')
-const nodemailer = require('nodemailer')
 const router = require('express').Router()
 const User = mongoose.model('User')
 
-const { forgotPasswordMailer } = require('../../config/nodemailer')
+const { forgotPasswordMailer, resetPasswordMailer } = require('../../config/nodemailer')
 
 // POST new user route (optional, open route)
 router.post('/signup', auth.optional, (req, res, next) => {
@@ -70,8 +69,19 @@ router.post('/login', auth.optional, async (req, res, next) => {
   })(req, res, next)
 })
 
+/*
+  @route
+    /forgot
+  @auth
+    none
+  @body
+    email[Object]
+  @return
+    status: 200
+  @special
+    Sends Email to registered user
+*/
 router.post('/forgot', auth.optional, (req, res, next) => {
-  console.log('forgot', req.body)
   async.waterfall([
     done => {
       crypto.randomBytes(20, (err, buf) => {
@@ -111,9 +121,8 @@ router.post('/reset/:token', auth.optional, (req, res, next) => {
           return res.status(404).send({ errors: { message: 'Token is invalid or has expired.' } })
         }
         if (err) {
-          next(err)
+          return next(err)
         }
-        console.log('User', user)
         user.setPassword(req.body.password)
         user.resetPasswordToken = undefined
         user.resetPasswordExpires = undefined
@@ -122,27 +131,7 @@ router.post('/reset/:token', auth.optional, (req, res, next) => {
       })
     },
     (user, done) => {
-      const smtpTransport = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false,
-        requireTLS: true,
-        auth: {
-          user: process.env.MAILER_EMAIL,
-          pass: process.env.MAILER_PASSWORD
-        }
-      })
-      const mailOptions = {
-        to: user.email,
-        from: 'kp.stallinger@gmail.com',
-        subject: 'Your password has been changed!',
-        text: 'Hello,\n\n' +
-          'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
-      }
-      smtpTransport.sendMail(mailOptions, err => {
-        done(err, 'done')
-        res.sendStatus(200)
-      })
+      resetPasswordMailer(user, done)
     }
   ], err => {
     next(err)
