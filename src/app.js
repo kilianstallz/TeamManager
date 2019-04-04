@@ -11,6 +11,7 @@ mongoose.promise = global.Promise
 
 // Configure isProduction variable
 const isProduction = process.env.NODE_ENV === 'production'
+console.log('isProduction', isProduction)
 
 // Initiate our app
 const app = express()
@@ -28,7 +29,11 @@ if (!isProduction) {
 }
 
 // Configure Mongoose
-mongoose.connect(`mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@sportondeploy-ps054.mongodb.net/deploy?retryWrites=true`, {
+let mongoURL = ''
+if (isProduction) {
+  mongoURL = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@sportondeploy-ps054.mongodb.net/deploy?retryWrites=true`
+} else { mongoURL = 'mongodb://localhost:27017/test' }
+mongoose.connect(mongoURL, {
   useNewUrlParser: true,
   useFindAndModify: false,
   useCreateIndex: true

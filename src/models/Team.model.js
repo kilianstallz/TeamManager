@@ -21,10 +21,6 @@ const TeamsSchema = new Schema({
     ref: 'Player',
     default: []
   }],
-  games: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Game'
-  }],
   // staff: [{
   //   type: Schema.Types.ObjectId,
   //   ref: 'Staff'

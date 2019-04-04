@@ -14,6 +14,7 @@ const UsersSchema = new Schema({
   },
   firstName: String,
   lastName: String,
+  sportType: String,
   hash: {
     type: String,
     select: false,
