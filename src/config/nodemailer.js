@@ -26,7 +26,7 @@ const forgotPasswordMailer = function (token, user, done, res) {
   })
 }
 
-const resetPasswordMailer = function (user, done) {
+const resetPasswordMailer = function (user, done, res) {
   const smtpTransport = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,

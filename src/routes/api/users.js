@@ -131,7 +131,7 @@ router.post('/reset/:token', auth.optional, (req, res, next) => {
       })
     },
     (user, done) => {
-      resetPasswordMailer(user, done)
+      resetPasswordMailer(user, done, res)
     }
   ], err => {
     next(err)
